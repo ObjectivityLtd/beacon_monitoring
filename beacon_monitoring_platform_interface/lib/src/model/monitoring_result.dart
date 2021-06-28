@@ -73,7 +73,11 @@ extension MonitoringStateExtension on MonitoringState {
   static parse(String? value) {
     if (_StringExtension.isBlank(value)) return null;
 
-    return MonitoringState.values.firstWhere((e) => describeEnum(e) == value);
+    try {
+      return MonitoringState.values.firstWhere((e) => describeEnum(e) == value);
+    } catch (_) {
+      return null;
+    }
   }
 
   String toJson() {

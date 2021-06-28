@@ -44,7 +44,6 @@ final class LocationService: NSObject {
     // MARK: - Private Methods
     private func setupLocationManager() {
         locationManager.pausesLocationUpdatesAutomatically = false
-        locationManager.startMonitoringSignificantLocationChanges()
         locationManager.allowsBackgroundLocationUpdates = true
         locationManager.delegate = self
     }

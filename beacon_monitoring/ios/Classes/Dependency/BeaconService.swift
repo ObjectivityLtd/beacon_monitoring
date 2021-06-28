@@ -90,6 +90,23 @@ class BeaconService: NSObject {
             onComplete(false, error as? BeaconService.Error)
         }
     }
+    private func startRanging(authorizationStatus: CLAuthorizationStatus, onComplete: @escaping BeaconServiceStartMonitoringResult) {
+        os_log()
+        do {
+            try permissionsService.checkAllowedPermissions(authorizationStatus: authorizationStatus)
+            locationService.requestAuthorization()
+            for region in regionsToMonitor {
+                locationService.startRangingBeacons(in: region)
+            }
+            onComplete(true, nil)
+        } catch BeaconService.Error.locationServicesAreNotDetermined {
+            locationService.requestAuthorization()
+            self.authorizationStatus = authorizationStatus
+            self.onComplete = onComplete
+        } catch {
+            onComplete(false, error as? BeaconService.Error)
+        }
+    }
     private func stopQueueMonitoring() {
         os_log()
         guard preferencesStorage.hasMonitoringListener() == false else { return }
@@ -128,7 +145,7 @@ extension BeaconService: BeaconServiceProtocol {
     }
     func startForegroundRanging(onComplete: @escaping BeaconServiceStartMonitoringResult) {
         os_log()
-        startMonitoring(authorizationStatus: .authorizedWhenInUse) { [weak self] didStartMonitoring, startMonitoringError in
+        startRanging(authorizationStatus: .authorizedWhenInUse) { [weak self] didStartMonitoring, startMonitoringError in
             guard let self = self else { return }
             self.preferencesStorage.isForegroundRangingStarted = didStartMonitoring
             onComplete(didStartMonitoring, startMonitoringError)
